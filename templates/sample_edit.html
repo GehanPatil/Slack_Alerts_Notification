@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Alert</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <h1>Edit Alert</h1>
+    
+    <form action="/edit_alert/{{ alert[0] }}" method="post">
+        <label for="user_id">Slack User ID:</label><br>
+        <input type="text" name="user_id" id="user_id" value="{{ alert[6] }}" required><br><br>
+
+        <label for="name">Alert Name:</label><br>
+        <input type="text" name="name" id="name" value="{{ alert[1] }}" required><br><br>
+
+        <label for="frequency">Frequency:</label>
+        <select name="frequency" id="frequency" required>
+            <option value="daily" {% if alert[2] == 'daily' %}selected{% endif %}>Daily</option>
+            <option value="weekly" {% if alert[2] == 'weekly' %}selected{% endif %}>Weekly</option>
+            <option value="monthly" {% if alert[2] == 'monthly' %}selected{% endif %}>Monthly</option>
+        </select><br><br>
+
+        <label for="time">Time:</label><br>
+        <input type="time" name="time" value="{{ alert[3] }}" required><br><br>
+
+        <div id="weekly-days" style="display: none;">
+            <label>Select Days:</label><br>
+            <input type="checkbox" name="days" value="Monday" {% if alert[4] and 'Monday' in alert[4] %}checked{% endif %}> Monday<br>
+            <input type="checkbox" name="days" value="Tuesday" {% if alert[4] and 'Tuesday' in alert[4] %}checked{% endif %}> Tuesday<br>
+            <input type="checkbox" name="days" value="Wednesday" {% if alert[4] and 'Wednesday' in alert[4] %}checked{% endif %}> Wednesday<br>
+            <input type="checkbox" name="days" value="Thursday" {% if alert[4] and 'Thursday' in alert[4] %}checked{% endif %}> Thursday<br>
+            <input type="checkbox" name="days" value="Friday" {% if alert[4] and 'Friday' in alert[4] %}checked{% endif %}> Friday<br>
+            <input type="checkbox" name="days" value="Saturday" {% if alert[4] and 'Saturday' in alert[4] %}checked{% endif %}> Saturday<br>
+            <input type="checkbox" name="days" value="Sunday" {% if alert[4] and 'Sunday' in alert[4] %}checked{% endif %}> Sunday<br><br>
+        </div>
+
+        <div id="monthly-date" style="display: none;">
+            <label for="date">Select Date:</label><br>
+            <input type="date" name="date" value="{{ alert[5] }}"><br><br>
+        </div>
+
+        <label for="recurring">Set as Recurring:</label>
+        <input type="checkbox" name="recurring" id="recurring" {% if alert[7] %}checked{% endif %}><br><br>
+
+        <button type="submit">Update Alert</button>
+    </form>
+
+    <script>
+        $(document).ready(function() {
+            const frequency = $('#frequency').val();
+            toggleFields(frequency);
+
+            $('#frequency').change(function() {
+                toggleFields($(this).val());
+            });
+
+            function toggleFields(frequency) {
+                if (frequency === 'weekly') {
+                    $('#weekly-days').show();
+                    $('#monthly-date').hide();
+                } else if (frequency === 'monthly') {
+                    $('#weekly-days').hide();
+                    $('#monthly-date').show();
+                } else {
+                    $('#weekly-days').hide();
+                    $('#monthly-date').hide();
+                }
+            }
+        });
+    </script>
+</body>
+</html>

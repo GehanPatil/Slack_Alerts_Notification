@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alert Scheduler</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <h1>Schedule Alerts</h1>
+
+    <!-- Form to Schedule a New Alert -->
+    <form action="/schedule" method="post">
+        <!-- Notification Method Selection -->
+        <label>Notification Method:</label><br>
+        <input type="checkbox" id="notify_slack" name="notify_slack" value="slack"> Slack<br>
+        <input type="checkbox" id="notify_email" name="notify_email" value="email"> Email<br><br>
+
+        <!-- Slack User ID Field -->
+        <div id="slack_field" style="display:none;">
+            <label for="user_id">Slack User ID:</label><br>
+            <input type="text" name="user_id" id="user_id"><br><br>
+        </div>
+
+        <!-- Email Address Field -->
+        <div id="email_field" style="display:none;">
+            <label for="email">Email Address:</label><br>
+            <input type="email" name="email" id="email"><br><br>
+        </div>
+
+        <label>Select Trigger Function(s):</label><br>
+        <input type="checkbox" name="trigger_function" value="low_score_alert"> Low Scorers Alert<br>
+        <input type="checkbox" name="trigger_function" value="high_scorers_present"> High Scorers Present Alert<br><br>
+
+        <label for="frequency">Frequency:</label>
+        <select name="frequency" id="frequency" required>
+            <option value="daily">Daily</option>
+            <option value="weekly">Weekly</option>
+            <option value="monthly">Monthly</option>
+        </select><br><br>
+
+        <label for="time">Time:</label><br>
+        <input type="time" name="time" required><br><br>
+
+        <!-- Weekly Days Selection -->
+        <div id="weekly-days" style="display:none;">
+            <label>Select Days:</label><br>
+            <input type="checkbox" name="days" value="Monday"> Monday<br>
+            <input type="checkbox" name="days" value="Tuesday"> Tuesday<br>
+            <input type="checkbox" name="days" value="Wednesday"> Wednesday<br>
+            <input type="checkbox" name="days" value="Thursday"> Thursday<br>
+            <input type="checkbox" name="days" value="Friday"> Friday<br>
+            <input type="checkbox" name="days" value="Saturday"> Saturday<br>
+            <input type="checkbox" name="days" value="Sunday"> Sunday<br><br>
+        </div>
+
+        <!-- Monthly Date Selection -->
+        <div id="monthly-date" style="display:none;">
+            <label for="date">Select Date:</label><br>
+            <input type="date" name="date"><br><br>
+        </div>
+
+        <!-- Recurring Checkbox -->
+        <label for="recurring">Set as Recurring:</label>
+        <input type="checkbox" name="recurring" id="recurring"><br><br>
+
+        <button type="submit">Schedule Alert</button>
+    </form>
+
+    <h2>Existing Alerts</h2>
+    <ul>
+        {% for alert in alerts %}
+            <li>
+                <strong>{{ alert[1] }}</strong> - {{ alert[2] }} at {{ alert[3] }}
+                {% if alert[2] == 'weekly' %}
+                    on {{ alert[4] }}
+                {% elif alert[2] == 'monthly' %}
+                    on {{ alert[5] }}
+                {% endif %}
+                - Recurring: {{ 'Yes' if alert[7] else 'No' }}
+
+                <!-- Edit button -->
+                <form action="/edit_alert/{{ alert[0] }}" method="get" style="display: inline;">
+                    <button type="submit">Edit</button>
+                </form>
+
+                <!-- Delete button -->
+                <form action="/delete_alert/{{ alert[0] }}" method="post" style="display: inline;">
+                    <button type="submit" onclick="return confirm('Are you sure you want to delete this alert?');">Delete</button>
+                </form>
+            </li>
+        {% endfor %}
+    </ul>
+
+    <script>
+        $(document).ready(function() {
+            // Toggle Slack User ID field visibility
+            $('#notify_slack').change(function() {
+                if ($(this).is(':checked')) {
+                    $('#slack_field').show();
+                } else {
+                    $('#slack_field').hide();
+                }
+            });
+
+            // Toggle Email Address field visibility
+            $('#notify_email').change(function() {
+                if ($(this).is(':checked')) {
+                    $('#email_field').show();
+                } else {
+                    $('#email_field').hide();
+                }
+            });
+
+            // Frequency-based UI adjustments
+            $('#frequency').change(function() {
+                const frequency = $(this).val();
+                if (frequency === 'weekly') {
+                    $('#weekly-days').show();
+                    $('#monthly-date').hide();
+                } else if (frequency === 'monthly') {
+                    $('#weekly-days').hide();
+                    $('#monthly-date').show();
+                } else {
+                    $('#weekly-days').hide();
+                    $('#monthly-date').hide();
+                }
+            });
+        });
+    </script>
+</body>
+</html>

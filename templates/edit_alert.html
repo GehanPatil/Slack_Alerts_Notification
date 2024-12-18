@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Alert</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <h1>Edit Alert</h1>
+    <form action="/edit_alert/{{ alert[0] }}" method="post">
+        <!-- Notification Method -->
+        <label for="notify_slack">Slack:</label>
+        <input type="checkbox" name="notify_slack" id="notify_slack" value="slack" {% if alert[5] %}checked{% endif %}><br>
+        <label for="notify_email">Email:</label>
+        <input type="checkbox" name="notify_email" id="notify_email" value="email" {% if alert[6] %}checked{% endif %}><br><br>
+
+        <!-- Slack User ID -->
+        <div>
+            <label for="user_id">Slack User ID:</label>
+            <input type="text" name="user_id" id="user_id" value="{{ alert[5] }}"><br>
+        </div>
+
+        <!-- Email -->
+        <div>
+            <label for="email">Email Address:</label>
+            <input type="email" name="email" id="email" value="{{ alert[6] }}"><br>
+        </div>
+
+        <!-- Trigger Functions -->
+        <label>Select Trigger Function(s):</label><br>
+        {% for func, label in [
+            ('low_score_alert', 'Low Scorers Alert'),
+            ('high_scorers_present', 'High Scorers Present Alert')
+        ] %}
+            <input type="checkbox" name="trigger_function" value="{{ func }}"
+                   {% if alert[8] and func in alert[8].split(',') %}checked{% endif %}>
+            {{ label }}<br>
+        {% endfor %}
+        <br>
+
+        <!-- Frequency -->
+        <label for="frequency">Frequency:</label>
+        <select name="frequency" id="frequency">
+            <option value="daily" {% if alert[1] == 'daily' %}selected{% endif %}>Daily</option>
+            <option value="weekly" {% if alert[1] == 'weekly' %}selected{% endif %}>Weekly</option>
+            <option value="monthly" {% if alert[1] == 'monthly' %}selected{% endif %}>Monthly</option>
+        </select><br>
+
+        <!-- Weekly Days -->
+        <div id="weekly-days" style="display: {% if alert[1] == 'weekly' %}block{% else %}none{% endif %};">
+            <label>Select Days:</label><br>
+            {% for day in ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'] %}
+                <input type="checkbox" name="days" value="{{ day }}" 
+                       {% if alert[3] and day in alert[3].split(',') %}checked{% endif %}>
+                {{ day }}<br>
+            {% endfor %}
+        </div>
+
+        <!-- Monthly Date -->
+        <div id="monthly-date" style="display: {% if alert[1] == 'monthly' %}block{% else %}none{% endif %};">
+            <label for="date">Select Date:</label><br>
+            <input type="date" name="date" id="date" value="{{ alert[4] }}"><br>
+        </div>
+
+        <!-- Time -->
+        <label for="time">Time:</label>
+        <input type="time" name="time" id="time" value="{{ alert[2] }}" required><br>
+
+        <!-- Recurring -->
+        <label for="recurring">Set as Recurring:</label>
+        <input type="checkbox" name="recurring" id="recurring" {% if alert[7] %}checked{% endif %}><br><br>
+
+        <button type="submit">Update Alert</button>
+    </form>
+
+    <script>
+        $(document).ready(function() {
+            // Toggle fields based on frequency selection
+            $('#frequency').change(function() {
+                const frequency = $(this).val();
+                if (frequency === 'weekly') {
+                    $('#weekly-days').show();
+                    $('#monthly-date').hide();
+                } else if (frequency === 'monthly') {
+                    $('#weekly-days').hide();
+                    $('#monthly-date').show();
+                } else {
+                    $('#weekly-days').hide();
+                    $('#monthly-date').hide();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
